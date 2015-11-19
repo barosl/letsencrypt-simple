@@ -1,0 +1,7 @@
+[cert]
+
+domains = ['example.com']
+
+[server]
+
+#staging = false
