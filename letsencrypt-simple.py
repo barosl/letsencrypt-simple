@@ -88,7 +88,7 @@ class Client:
         signature = b64(subprocess.check_output(['openssl', 'dgst', '-sha256', '-sign', self.account_key], input='{}.{}'.format(protected, payload).encode('utf-8')))
 
         req = {
-            'header': header,
+            'header': {},
             'protected': protected,
             'payload': payload,
             'signature': signature,
