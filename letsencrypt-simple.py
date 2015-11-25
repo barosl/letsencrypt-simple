@@ -17,6 +17,8 @@ DEFAULT_API_URL = 'https://acme-v01.api.letsencrypt.org/acme/'
 STAGING_API_URL = 'https://acme-staging.api.letsencrypt.org/acme/'
 AGREEMENT_URL = 'https://letsencrypt.org/documents/LE-SA-v1.0.1-July-27-2015.pdf'
 ACCOUNT_KEY_FILE = 'keys/account.key'
+INTERMEDIATE_CERT_URL = 'https://letsencrypt.org/certs/lets-encrypt-x1-cross-signed.pem'
+INTERMEDIATE_CERT_FILE = 'keys/lets-encrypt-x1-cross-signed.pem'
 
 class ApiError(Exception):
     def __init__(self, info):
@@ -50,6 +52,12 @@ def write_cert(fname, cert_bin):
     with open(fname, 'w') as fp:
         cert_text = '\n'.join(textwrap.wrap(base64.b64encode(cert_bin).decode('ascii'), 64))
         fp.write('-----BEGIN CERTIFICATE-----\n{}\n-----END CERTIFICATE-----\n'.format(cert_text))
+
+def retrieve_intermediate():
+    if os.path.exists(INTERMEDIATE_CERT_FILE): return
+
+    with open(INTERMEDIATE_CERT_FILE, 'w') as fp:
+        fp.write(requests.get(INTERMEDIATE_CERT_URL).text)
 
 class Client:
     def __init__(self, account_key, *, api_url=DEFAULT_API_URL):
@@ -167,6 +175,13 @@ def main():
 
         fname = 'keys/{}.crt'.format(domain)
         write_cert(fname, cert_bin)
+
+        if cfg['cert'].get('chain', True):
+            retrieve_intermediate()
+
+            with open(fname, 'a') as fp:
+                with open(INTERMEDIATE_CERT_FILE) as fp_from:
+                    fp.write(fp_from.read())
 
         print('----')
         print('* Issued {}'.format(fname))

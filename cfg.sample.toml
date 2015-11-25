@@ -1,6 +1,7 @@
 [cert]
 
 domains = ['example.com']
+#chain = true
 
 [server]
 
