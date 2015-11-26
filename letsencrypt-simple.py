@@ -72,7 +72,7 @@ class Client:
 
     def api(self, path, binary=False, **body):
         if not self.nonce:
-            self.nonce = requests.get(self.api_url + 'new-reg').headers['Replay-Nonce']
+            self.nonce = requests.head(self.api_url + 'new-reg').headers['Replay-Nonce']
 
         header = {
             'alg': 'RS256',
